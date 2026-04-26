@@ -12,73 +12,95 @@
             background: #0a0a0a; color: #fff; overflow: hidden; height: 100vh; width: 100vw;
         }
         .header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 30px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 24px;
+            background: linear-gradient(180deg, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.5) 60%, transparent 100%);
             display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px);
         }
-        .header-title { font-size: 20px; font-weight: 600; }
-        .header-subtitle { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+        .header-title {
+            font-size: 20px; font-weight: 700; letter-spacing: 1px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
         .progress-indicator {
-            font-size: 14px; color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.15);
-            padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(10px); font-weight: 500;
+            font-size: 13px; color: rgba(255,255,255,0.9); background: rgba(79,172,254,0.2);
+            padding: 6px 14px; border-radius: 16px; backdrop-filter: blur(10px); font-weight: 600;
+            border: 1px solid rgba(79,172,254,0.3);
         }
         #panorama-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         #panorama { width: 100%; height: 100%; }
         .nav-controls {
-            position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; z-index: 100;
+            position: fixed; bottom: 150px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 24px; z-index: 100;
         }
         .nav-btn {
-            width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(20px); color: #fff; cursor: pointer;
+            width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(10,15,30,0.7); backdrop-filter: blur(20px); color: #fff; cursor: pointer;
             display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .nav-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.6); transform: scale(1.1); }
-        .nav-btn:active { transform: scale(0.95); }
-        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        .nav-btn:hover { background: rgba(79,172,254,0.3); border-color: rgba(79,172,254,0.6); transform: scale(1.08); }
+        .nav-btn:active { transform: scale(0.92); }
+        .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
         .nav-btn svg { width: 24px; height: 24px; fill: currentColor; }
-        .nav-btn.forward { width: 64px; height: 64px; background: rgba(79,172,254,0.4); border-color: rgba(79,172,254,0.7); }
-        .nav-btn.forward:hover { background: rgba(79,172,254,0.6); border-color: rgba(79,172,254,1); }
+        .nav-btn.forward {
+            width: 68px; height: 68px;
+            background: linear-gradient(135deg, rgba(79,172,254,0.6), rgba(0,242,254,0.4));
+            border-color: rgba(79,172,254,0.7);
+            box-shadow: 0 4px 20px rgba(79,172,254,0.3);
+        }
+        .nav-btn.forward:hover {
+            background: linear-gradient(135deg, rgba(79,172,254,0.8), rgba(0,242,254,0.6));
+            border-color: #4facfe; box-shadow: 0 4px 30px rgba(79,172,254,0.5);
+        }
         .thumbnails-container {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); padding: 12px 16px;
-            border-radius: 16px; border: 1px solid rgba(255,255,255,0.15);
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100;
+            background: rgba(10,15,30,0.8); backdrop-filter: blur(20px); padding: 10px 14px;
+            border-radius: 14px; border: 1px solid rgba(79,172,254,0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .thumbnails { display: flex; gap: 10px; align-items: center; }
+        .thumbnails { display: flex; gap: 8px; align-items: center; }
         .thumbnail {
-            width: 72px; height: 48px; border-radius: 8px; overflow: hidden; cursor: pointer;
-            position: relative; border: 2px solid transparent; transition: all 0.3s ease; flex-shrink: 0;
+            width: 68px; height: 44px; border-radius: 8px; overflow: hidden; cursor: pointer;
+            position: relative; border: 2px solid rgba(255,255,255,0.1); transition: all 0.3s ease; flex-shrink: 0;
         }
-        .thumbnail:hover { border-color: rgba(255,255,255,0.5); transform: scale(1.05); }
-        .thumbnail.active { border-color: #4facfe; box-shadow: 0 0 15px rgba(79,172,254,0.6); }
+        .thumbnail:hover { border-color: rgba(79,172,254,0.5); transform: scale(1.08); }
+        .thumbnail.active {
+            border-color: #4facfe;
+            box-shadow: 0 0 12px rgba(79,172,254,0.5), inset 0 0 8px rgba(79,172,254,0.2);
+        }
         .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
         .thumbnail-number {
-            position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.8);
-            color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 500;
+            position: absolute; bottom: 3px; right: 3px; background: rgba(0,0,0,0.7);
+            color: #fff; font-size: 10px; padding: 2px 5px; border-radius: 4px; font-weight: 500;
         }
         .location-indicator {
-            position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); padding: 14px 28px;
-            border-radius: 24px; border: 1px solid rgba(255,255,255,0.15); text-align: center;
+            position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 100;
+            background: rgba(10,15,30,0.8); backdrop-filter: blur(20px); padding: 12px 24px;
+            border-radius: 20px; border: 1px solid rgba(79,172,254,0.2); text-align: center;
             transition: all 0.4s ease; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
-        .location-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-        .location-desc { font-size: 12px; color: rgba(255,255,255,0.7); }
+        .location-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+        .location-desc { font-size: 11px; color: rgba(255,255,255,0.6); }
         .loading-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0a0a0a;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(15,25,50,0.95) 0%, rgba(10,15,30,0.98) 100%);
             z-index: 200; display: flex; flex-direction: column; align-items: center;
             justify-content: center; transition: opacity 0.6s ease;
         }
         .loading-overlay.hidden { opacity: 0; pointer-events: none; }
         .loading-spinner {
-            width: 48px; height: 48px; border: 3px solid rgba(255,255,255,0.1);
+            width: 48px; height: 48px; border: 3px solid rgba(79,172,254,0.15);
             border-top-color: #4facfe; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(79,172,254,0.2);
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 12px; }
-        .loading-progress-bar { width: 280px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
-        .loading-progress-fill { height: 100%; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); border-radius: 3px; transition: width 0.3s ease; width: 0%; }
-        .loading-percentage { font-size: 13px; color: rgba(255,255,255,0.5); }
+        .loading-text { font-size: 15px; color: rgba(255,255,255,0.8); margin-bottom: 14px; font-weight: 500; }
+        .loading-progress-bar { width: 240px; height: 5px; background: rgba(79,172,254,0.15); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+        .loading-progress-fill { height: 100%; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); border-radius: 3px; transition: width 0.3s ease; width: 0%; box-shadow: 0 0 10px rgba(79,172,254,0.5); }
+        .loading-percentage { font-size: 12px; color: rgba(79,172,254,0.6); font-weight: 500; }
         .keyboard-hint {
             position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100;
             font-size: 12px; color: rgba(255,255,255,0.5); text-align: center;
@@ -99,60 +121,93 @@
             .location-name { font-size: 14px; }
         }
 
-        /* Custom hotspot styles */
+        /* Custom hotspot styles - Redesign */
+        /* POI markers - pulsing dot with label */
         .hotspot-poi {
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+            transition: transform 0.2s ease;
         }
-        .hotspot-poi .poi-dot {
-            width: 20px; height: 20px; background: #ff6b35; border-radius: 50%;
-            border: 3px solid #fff; box-shadow: 0 0 10px rgba(255,107,53,0.6);
+        .hotspot-poi:hover { transform: scale(1.15); }
+        .hotspot-poi .poi-pin {
+            position: relative; width: 32px; height: 40px;
+        }
+        .hotspot-poi .poi-pin::before {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 24px; height: 24px; background: linear-gradient(135deg, #ff6b35, #ff4500);
+            border-radius: 50%; border: 3px solid #fff;
+            box-shadow: 0 0 12px rgba(255,107,53,0.7), inset 0 -2px 4px rgba(0,0,0,0.2);
             animation: poiPulse 2s ease-in-out infinite;
         }
+        .hotspot-poi .poi-pin::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-top: 12px solid #ff6b35;
+        }
         @keyframes poiPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,107,53,0.6); }
-            50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(255,107,53,0.8); }
+            0%, 100% { box-shadow: 0 0 12px rgba(255,107,53,0.7), inset 0 -2px 4px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 0 24px rgba(255,107,53,1), inset 0 -2px 4px rgba(0,0,0,0.2); }
         }
         .hotspot-poi .poi-label {
-            margin-top: 6px; background: rgba(0,0,0,0.75); color: #fff;
-            padding: 4px 10px; border-radius: 12px; font-size: 13px; white-space: nowrap;
-            border: 1px solid rgba(255,255,255,0.3); font-weight: 500;
+            margin-top: 4px; background: linear-gradient(135deg, rgba(255,107,53,0.9), rgba(255,69,0,0.9));
+            color: #fff; padding: 4px 12px; border-radius: 14px; font-size: 12px;
+            white-space: nowrap; border: 2px solid rgba(255,255,255,0.5); font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255,107,53,0.4); letter-spacing: 0.5px;
         }
 
-        .hotspot-arrow {
-            display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
-        }
-        .hotspot-arrow .arrow-icon {
-            font-size: 36px; color: #4facfe; line-height: 1;
-            animation: arrowBounce 1.5s ease-in-out infinite;
-        }
-        @keyframes arrowBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-        .hotspot-arrow .arrow-label {
-            margin-top: 4px; background: rgba(0,0,0,0.7); color: #4facfe;
-            padding: 2px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap;
-            font-weight: 500;
-        }
-
+        /* Blue box for building highlights */
         .hotspot-blue-box {
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
         }
         .hotspot-blue-box .box-frame {
-            width: 180px; height: 80px; border: 3px solid #4facfe; border-radius: 12px;
-            background: rgba(79,172,254,0.15); display: flex; align-items: center;
+            width: 160px; height: 70px; border: 3px solid #4facfe; border-radius: 10px;
+            background: rgba(79,172,254,0.1); display: flex; align-items: center;
             justify-content: center; animation: boxGlow 2s ease-in-out infinite;
+            position: relative;
+        }
+        .hotspot-blue-box .box-frame::before,
+        .hotspot-blue-box .box-frame::after {
+            content: ''; position: absolute; width: 12px; height: 12px; border-color: #4facfe;
+            border-style: solid;
+        }
+        .hotspot-blue-box .box-frame::before {
+            top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 6px 0 0 0;
+        }
+        .hotspot-blue-box .box-frame::after {
+            bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 6px 0;
         }
         @keyframes boxGlow {
             0%, 100% { box-shadow: 0 0 10px rgba(79,172,254,0.3); }
             50% { box-shadow: 0 0 25px rgba(79,172,254,0.6); }
         }
         .hotspot-blue-box .box-label {
-            margin-top: 6px; background: rgba(79,172,254,0.8); color: #fff;
-            padding: 4px 14px; border-radius: 12px; font-size: 14px; font-weight: 600;
+            margin-top: 6px; background: linear-gradient(135deg, rgba(79,172,254,0.9), rgba(0,242,254,0.9));
+            color: #fff; padding: 4px 14px; border-radius: 12px; font-size: 13px; font-weight: 600;
+            letter-spacing: 0.5px; white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(79,172,254,0.4);
+        }
+
+        /* SVG-based arrow hotspots */
+        .hotspot-arrow {
+            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
+        }
+        .hotspot-arrow .arrow-icon {
+            animation: arrowBounce 1.5s ease-in-out infinite;
+        }
+        .hotspot-arrow .arrow-icon svg {
+            width: 40px; height: 40px;
+        }
+        @keyframes arrowBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.05); }
+        }
+        .hotspot-arrow .arrow-label {
+            margin-top: 2px; background: linear-gradient(135deg, rgba(79,172,254,0.9), rgba(0,242,254,0.9));
+            color: #fff; padding: 3px 10px; border-radius: 10px; font-size: 11px;
+            white-space: nowrap; font-weight: 600; letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(79,172,254,0.3);
         }
 
         /* Override Pannellum hotspot styles */
@@ -209,12 +264,14 @@
         // pitch: vertical (-90 to 90, 0=horizontal), yaw: horizontal (-180 to 180, 0=center)
         var hotspotsByScene = {
             s1: [
-                // 门诊楼 POI (center building in p1.jpg)
-                { pitch: -5, yaw: 10, type: "poi", label: "门诊楼" },
-                // Forward arrows along the lane toward hospital entrance (per user's red arrow)
+                // 门诊楼 - 左侧建筑入口 (blue box frame)
+                { pitch: -5, yaw: -45, type: "blue-box", label: "门诊楼" },
+                // 1号楼 - 中央白色高楼
+                { pitch: -8, yaw: 10, type: "poi", label: "1号楼" },
+                // Forward arrows along the lane (per user's red arrow)
                 { pitch: -28, yaw: 5, type: "arrow-forward", label: "向前" },
-                { pitch: -20, yaw: 12, type: "arrow-forward", label: "" },
-                { pitch: -12, yaw: 18, type: "arrow-forward", label: "" }
+                { pitch: -20, yaw: 10, type: "arrow-forward", label: "" },
+                { pitch: -12, yaw: 15, type: "arrow-forward", label: "" }
             ],
             s2: [
                 // 1号楼 POI (left side building in p2.jpg)
@@ -265,13 +322,13 @@
             var div = document.createElement('div');
             if (hs.type === "poi") {
                 div.className = 'hotspot-poi';
-                div.innerHTML = '<div class="poi-dot"></div><div class="poi-label">' + hs.label + '</div>';
+                div.innerHTML = '<div class="poi-pin"></div><div class="poi-label">' + hs.label + '</div>';
             } else if (hs.type === "arrow-forward") {
                 div.className = 'hotspot-arrow';
-                div.innerHTML = '<div class="arrow-icon">&uarr;</div>' + (hs.label ? '<div class="arrow-label">' + hs.label + '</div>' : '');
+                div.innerHTML = '<div class="arrow-icon"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="arrGradF" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#00c6ff"/><stop offset="100%" stop-color="#4facfe"/></linearGradient></defs><path d="M20 4 L28 16 L24 16 L24 36 L16 36 L16 16 L12 16 Z" fill="url(#arrGradF)" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></div>' + (hs.label ? '<div class="arrow-label">' + hs.label + '</div>' : '');
             } else if (hs.type === "arrow-left") {
                 div.className = 'hotspot-arrow';
-                div.innerHTML = '<div class="arrow-icon">&larr;</div>' + (hs.label ? '<div class="arrow-label">' + hs.label + '</div>' : '');
+                div.innerHTML = '<div class="arrow-icon"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="arrGradL" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="0%" stop-color="#00c6ff"/><stop offset="100%" stop-color="#4facfe"/></linearGradient></defs><path d="M4 20 L16 12 L16 16 L36 16 L36 24 L16 24 L16 28 Z" fill="url(#arrGradL)" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></div>' + (hs.label ? '<div class="arrow-label">' + hs.label + '</div>' : '');
             } else if (hs.type === "blue-box") {
                 div.className = 'hotspot-blue-box';
                 div.innerHTML = '<div class="box-frame"></div><div class="box-label">' + hs.label + '</div>';
