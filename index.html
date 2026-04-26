@@ -98,6 +98,70 @@
             .location-indicator { top: 70px; padding: 10px 20px; }
             .location-name { font-size: 14px; }
         }
+
+        /* Custom hotspot styles */
+        .hotspot-poi {
+            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+        }
+        .hotspot-poi .poi-dot {
+            width: 20px; height: 20px; background: #ff6b35; border-radius: 50%;
+            border: 3px solid #fff; box-shadow: 0 0 10px rgba(255,107,53,0.6);
+            animation: poiPulse 2s ease-in-out infinite;
+        }
+        @keyframes poiPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,107,53,0.6); }
+            50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(255,107,53,0.8); }
+        }
+        .hotspot-poi .poi-label {
+            margin-top: 6px; background: rgba(0,0,0,0.75); color: #fff;
+            padding: 4px 10px; border-radius: 12px; font-size: 13px; white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.3); font-weight: 500;
+        }
+
+        .hotspot-arrow {
+            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+        }
+        .hotspot-arrow .arrow-icon {
+            font-size: 36px; color: #4facfe; line-height: 1;
+            animation: arrowBounce 1.5s ease-in-out infinite;
+        }
+        @keyframes arrowBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .hotspot-arrow .arrow-label {
+            margin-top: 4px; background: rgba(0,0,0,0.7); color: #4facfe;
+            padding: 2px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .hotspot-blue-box {
+            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+        }
+        .hotspot-blue-box .box-frame {
+            width: 180px; height: 80px; border: 3px solid #4facfe; border-radius: 12px;
+            background: rgba(79,172,254,0.15); display: flex; align-items: center;
+            justify-content: center; animation: boxGlow 2s ease-in-out infinite;
+        }
+        @keyframes boxGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(79,172,254,0.3); }
+            50% { box-shadow: 0 0 25px rgba(79,172,254,0.6); }
+        }
+        .hotspot-blue-box .box-label {
+            margin-top: 6px; background: rgba(79,172,254,0.8); color: #fff;
+            padding: 4px 14px; border-radius: 12px; font-size: 14px; font-weight: 600;
+        }
+
+        /* Override Pannellum hotspot styles */
+        .pnlm-hotspot { pointer-events: auto !important; }
+        .pnlm-hotspot .pnlm-poi, .pnlm-hotspot .pnlm-info { display: none !important; }
+        .pnlm-hotspot > div:first-child {
+            width: auto !important; height: auto !important; margin-top: 0 !important;
+            margin-left: 0 !important;
+        }
     </style>
 </head>
 <body>
@@ -141,6 +205,51 @@
             { id: "s6", name: "住院一部", desc: "住院一部内部", image: "p6.jpg" }
         ];
 
+        // Hotspot definitions for each scene
+        // pitch: vertical (-90 to 90, 0=horizontal), yaw: horizontal (-180 to 180, 0=center)
+        var hotspotsByScene = {
+            s1: [
+                // 门诊楼 POI (center building in p1.jpg)
+                { pitch: -5, yaw: 10, type: "poi", label: "门诊楼" },
+                // Forward arrows on the right side (road into hospital)
+                { pitch: -15, yaw: 60, type: "arrow-forward", label: "向前" },
+                { pitch: -18, yaw: 50, type: "arrow-forward", label: "" },
+                { pitch: -12, yaw: 70, type: "arrow-forward", label: "" }
+            ],
+            s2: [
+                // 1号楼 POI (left side building in p2.jpg)
+                { pitch: -5, yaw: -60, type: "poi", label: "1号楼" },
+                // Forward arrows on the right side
+                { pitch: -15, yaw: 50, type: "arrow-forward", label: "向前" },
+                { pitch: -18, yaw: 40, type: "arrow-forward", label: "" },
+                { pitch: -12, yaw: 60, type: "arrow-forward", label: "" }
+            ],
+            s3: [
+                // Left turn arrows (road curves left in p3.jpg)
+                { pitch: -20, yaw: -50, type: "arrow-left", label: "左转" },
+                { pitch: -18, yaw: -65, type: "arrow-left", label: "" },
+                { pitch: -22, yaw: -35, type: "arrow-left", label: "" }
+            ],
+            s4: [
+                // Forward arrows (path toward 住院部 in p4.jpg)
+                { pitch: -15, yaw: 20, type: "arrow-forward", label: "向前" },
+                { pitch: -18, yaw: 10, type: "arrow-forward", label: "" },
+                { pitch: -12, yaw: 30, type: "arrow-forward", label: "" }
+            ],
+            s5: [
+                // Left turn arrows (path turns left toward 住院部 in p5.jpg)
+                { pitch: -15, yaw: -50, type: "arrow-left", label: "左转" },
+                { pitch: -18, yaw: -65, type: "arrow-left", label: "" },
+                { pitch: -12, yaw: -35, type: "arrow-left", label: "" }
+            ],
+            s6: [
+                // 四号楼 POI on the left (in p6.jpg, "四号楼" sign on building)
+                { pitch: -10, yaw: -80, type: "poi", label: "四号楼" },
+                // Blue box around 住院一部 (right side of the building)
+                { pitch: -8, yaw: -40, type: "blue-box", label: "住院一部" }
+            ]
+        };
+
         var currentIndex = 0;
         var viewer = null;
         var isTransitioning = false;
@@ -149,6 +258,25 @@
             document.getElementById('loadingProgress').style.width = Math.min(100, pct) + '%';
             document.getElementById('loadingPercentage').textContent = Math.round(pct) + '%';
             if (pct >= 100) document.getElementById('loadingText').textContent = '加载完成!';
+        }
+
+        // Create hotspot HTML element
+        function createHotspotElement(hs) {
+            var div = document.createElement('div');
+            if (hs.type === "poi") {
+                div.className = 'hotspot-poi';
+                div.innerHTML = '<div class="poi-dot"></div><div class="poi-label">' + hs.label + '</div>';
+            } else if (hs.type === "arrow-forward") {
+                div.className = 'hotspot-arrow';
+                div.innerHTML = '<div class="arrow-icon">&uarr;</div>' + (hs.label ? '<div class="arrow-label">' + hs.label + '</div>' : '');
+            } else if (hs.type === "arrow-left") {
+                div.className = 'hotspot-arrow';
+                div.innerHTML = '<div class="arrow-icon">&larr;</div>' + (hs.label ? '<div class="arrow-label">' + hs.label + '</div>' : '');
+            } else if (hs.type === "blue-box") {
+                div.className = 'hotspot-blue-box';
+                div.innerHTML = '<div class="box-frame"></div><div class="box-label">' + hs.label + '</div>';
+            }
+            return div;
         }
 
         function initThumbnails() {
@@ -164,15 +292,34 @@
             }
         }
 
-        // Build Pannellum multi-scene config
+        // Build Pannellum multi-scene config with hotspots
         function buildConfig() {
             var scenes = {};
             for (var i = 0; i < sceneData.length; i++) {
-                scenes[sceneData[i].id] = {
+                var sid = sceneData[i].id;
+                var sceneCfg = {
                     type: "equirectangular",
                     panorama: sceneData[i].image,
-                    pitch: 0, yaw: 0, hfov: 120
+                    pitch: 0, yaw: 0, hfov: 120,
+                    hotSpots: []
                 };
+
+                // Add hotspots for this scene
+                var hss = hotspotsByScene[sid];
+                if (hss) {
+                    for (var j = 0; j < hss.length; j++) {
+                        sceneCfg.hotSpots.push({
+                            pitch: hss[j].pitch,
+                            yaw: hss[j].yaw,
+                            type: "info",
+                            text: " ",
+                            createTooltipFunc: (function(hs) {
+                                return function() { return createHotspotElement(hs); };
+                            })(hss[j])
+                        });
+                    }
+                }
+                scenes[sid] = sceneCfg;
             }
             return {
                 "default": {
