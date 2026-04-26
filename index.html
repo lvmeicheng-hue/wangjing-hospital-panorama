@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>望京医院 - 全景导览</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 20px 30px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 4px;
+        }
+
+        .progress-indicator {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Panorama Container */
+        #panorama-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #panorama {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Navigation Controls */
+        .nav-controls {
+            position: fixed;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.6);
+            transform: scale(1.1);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Forward button - larger and more prominent */
+        .nav-btn.forward {
+            width: 64px;
+            height: 64px;
+            background: rgba(79, 172, 254, 0.3);
+            border-color: rgba(79, 172, 254, 0.6);
+        }
+
+        .nav-btn.forward:hover {
+            background: rgba(79, 172, 254, 0.5);
+            border-color: rgba(79, 172, 254, 0.9);
+        }
+
+        /* Thumbnails */
+        .thumbnails-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .thumbnail {
+            width: 72px;
+            height: 48px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .thumbnail:hover {
+            border-color: rgba(255,255,255,0.5);
+            transform: scale(1.05);
+        }
+
+        .thumbnail.active {
+            border-color: #4facfe;
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.5);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumbnail-number {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        /* Location indicator */
+        .location-indicator {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .location-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .location-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0a0a0a;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Transition animation */
+        .panorama-transition {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: 10;
+        }
+
+        .panorama-transition.active {
+            opacity: 1;
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+        }
+
+        .keyboard-hint kbd {
+            display: inline-block;
+            padding: 3px 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin: 0 4px;
+            font-family: inherit;
+        }
+
+        /* Pannellum customization */
+        .pnlm-ui {
+            border-radius: 0 !important;
+        }
+
+        .pnlm-zoom-controls {
+            display: none !important;
+        }
+
+        .pnlm-controls-container {
+            display: none !important;
+        }
+
+        /* Fade animation for location text */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载全景图...</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <div class="header-title">望京医院全景导览</div>
+            <div class="header-subtitle">从入口到住院一部</div>
+        </div>
+        <div class="progress-indicator">
+            <span id="currentIndex">1</span> / 6
+        </div>
+    </div>
+
+    <!-- Location indicator -->
+    <div class="location-indicator" id="locationIndicator">
+        <div class="location-name" id="locationName">医院入口</div>
+        <div class="location-desc" id="locationDesc">望京医院正门入口</div>
+    </div>
+
+    <!-- Panorama container -->
+    <div id="panorama-container">
+        <div id="panorama"></div>
+    </div>
+
+    <!-- Navigation controls -->
+    <div class="nav-controls">
+        <button class="nav-btn backward" id="backwardBtn" disabled>
+            <svg viewBox="0 0 24 24">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+            </svg>
+        </button>
+        <button class="nav-btn forward" id="forwardBtn">
+            <svg viewBox="0 0 24 24">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Keyboard hint -->
+    <div class="keyboard-hint">
+        使用 <kbd>←</kbd> <kbd>→</kbd> 方向键或点击按钮切换
+    </div>
+
+    <!-- Thumbnails -->
+    <div class="thumbnails-container">
+        <div class="thumbnails" id="thumbnails"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script>
+        // Panorama data
+        const panoramas = [
+            {
+                id: 1,
+                name: "医院入口",
+                desc: "望京医院正门入口",
+                image: "./望京医院/望京医院1.jpg"
+            },
+            {
+                id: 2,
+                name: "院内通道",
+                desc: "进入医院后的主通道",
+                image: "./望京医院/望京医院2.jpg"
+            },
+            {
+                id: 3,
+                name: "院内道路",
+                desc: "院内主干道",
+                image: "./望京医院/望京医院3.jpg"
+            },
+            {
+                id: 4,
+                name: "门诊区域",
+                desc: "门诊楼附近区域",
+                image: "./望京医院/望京医院4.jpg"
+            },
+            {
+                id: 5,
+                name: "住院部入口",
+                desc: "住院部大楼入口",
+                image: "./望京医院/望京医院5.jpg"
+            },
+            {
+                id: 6,
+                name: "住院一部",
+                desc: "住院一部内部",
+                image: "./望京医院/望京医院6.jpg"
+            }
+        ];
+
+        let currentIndex = 0;
+        let viewer = null;
+        let isTransitioning = false;
+
+        // Initialize thumbnails
+        function initThumbnails() {
+            const container = document.getElementById('thumbnails');
+            panoramas.forEach((pano, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'thumbnail' + (index === 0 ? ' active' : '');
+                thumb.innerHTML = `
+                    <img src="${pano.image}" alt="${pano.name}">
+                    <div class="thumbnail-number">${pano.id}</div>
+                `;
+                thumb.addEventListener('click', () => goToPanorama(index));
+                container.appendChild(thumb);
+            });
+        }
+
+        // Initialize panorama viewer
+        function initViewer(index) {
+            if (viewer) {
+                viewer.destroy();
+            }
+
+            viewer = pannellum.viewer('panorama', {
+                type: 'equirectangular',
+                panorama: panoramas[index].image,
+                autoLoad: true,
+                showControls: false,
+                showZoomCtrl: false,
+                mouseZoom: true,
+                draggable: true,
+                disableKeyboardCtrl: true,
+                pitch: 0,
+                yaw: 0,
+                hfov: 120
+            });
+
+            viewer.on('load', () => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            });
+
+            updateUI(index);
+        }
+
+        // Go to specific panorama
+        function goToPanorama(index) {
+            if (index < 0 || index >= panoramas.length || index === currentIndex || isTransitioning) {
+                return;
+            }
+
+            isTransitioning = true;
+            currentIndex = index;
+
+            // Update viewer
+            viewer.destroy();
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            viewer = pannellum.viewer('panorama', {
+                type: 'equirectangular',
+                panorama: panoramas[index].image,
+                autoLoad: true,
+                showControls: false,
+                showZoomCtrl: false,
+                mouseZoom: true,
+                draggable: true,
+                disableKeyboardCtrl: true,
+                pitch: 0,
+                yaw: 0,
+                hfov: 120
+            });
+
+            viewer.on('load', () => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                isTransitioning = false;
+            });
+
+            updateUI(index);
+        }
+
+        // Update UI elements
+        function updateUI(index) {
+            // Update progress
+            document.getElementById('currentIndex').textContent = index + 1;
+
+            // Update location indicator
+            const indicator = document.getElementById('locationIndicator');
+            document.getElementById('locationName').textContent = panoramas[index].name;
+            document.getElementById('locationDesc').textContent = panoramas[index].desc;
+            
+            // Add fade animation
+            indicator.classList.remove('fade-in');
+            void indicator.offsetWidth; // Force reflow
+            indicator.classList.add('fade-in');
+
+            // Update buttons
+            document.getElementById('backwardBtn').disabled = index === 0;
+            document.getElementById('forwardBtn').disabled = index === panoramas.length - 1;
+
+            // Update thumbnails
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('forwardBtn').addEventListener('click', () => {
+            goToPanorama(currentIndex + 1);
+        });
+
+        document.getElementById('backwardBtn').addEventListener('click', () => {
+            goToPanorama(currentIndex - 1);
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                goToPanorama(currentIndex + 1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                goToPanorama(currentIndex - 1);
+            }
+        });
+
+        // Touch swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next
+                    goToPanorama(currentIndex + 1);
+                } else {
+                    // Swipe right - previous
+                    goToPanorama(currentIndex - 1);
+                }
+            }
+        }
+
+        // Initialize
+        initThumbnails();
+        initViewer(0);
+    </script>
+</body>
+</html>
