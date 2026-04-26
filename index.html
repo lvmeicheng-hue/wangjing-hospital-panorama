@@ -264,6 +264,7 @@
             border-top-color: #4facfe;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
 
         @keyframes spin {
@@ -271,9 +272,31 @@
         }
 
         .loading-text {
-            margin-top: 20px;
-            font-size: 14px;
-            color: rgba(255,255,255,0.7);
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 12px;
+        }
+
+        .loading-progress-bar {
+            width: 280px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .loading-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .loading-percentage {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
         }
 
         /* Keyboard hint */
@@ -374,7 +397,11 @@
     <!-- Loading overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
-        <div class="loading-text">正在加载全景图...</div>
+        <div class="loading-text" id="loadingText">正在加载全景图...</div>
+        <div class="loading-progress-bar">
+            <div class="loading-progress-fill" id="loadingProgress"></div>
+        </div>
+        <div class="loading-percentage" id="loadingPercentage">0%</div>
     </div>
 
     <!-- Header -->
@@ -471,6 +498,42 @@
         let viewerNext = null;
         let isTransitioning = false;
 
+        // Loading progress tracking
+        let loadedImages = new Set();
+        let totalImagesToLoad = 1;
+        let loadProgress = 0;
+
+        function updateLoadingProgress(percent) {
+            loadProgress = Math.min(100, Math.max(0, percent));
+            const progressBar = document.getElementById('loadingProgress');
+            const percentageText = document.getElementById('loadingPercentage');
+            const loadingText = document.getElementById('loadingText');
+            
+            if (progressBar) {
+                progressBar.style.width = loadProgress + '%';
+            }
+            if (percentageText) {
+                percentageText.textContent = Math.round(loadProgress) + '%';
+            }
+            if (loadingText) {
+                if (loadProgress < 100) {
+                    loadingText.textContent = '正在加载全景图...';
+                } else {
+                    loadingText.textContent = '加载完成！';
+                }
+            }
+        }
+
+        // Preload images with progress tracking
+        function preloadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
         // Initialize thumbnails
         function initThumbnails() {
             const container = document.getElementById('thumbnails');
@@ -487,7 +550,7 @@
         }
 
         // Initialize panorama viewer
-        function initViewer(index, containerId) {
+        async function initViewer(index, containerId) {
             const viewerConfig = {
                 type: 'equirectangular',
                 panorama: panoramas[index].image,
@@ -502,11 +565,28 @@
                 hfov: 120
             };
 
-            return pannellum.viewer(containerId, viewerConfig);
+            const newViewer = pannellum.viewer(containerId, viewerConfig);
+            
+            // Simulate progress while loading
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += Math.random() * 10;
+                    updateLoadingProgress(progress);
+                }
+            }, 200);
+
+            return new Promise((resolve) => {
+                newViewer.on('load', () => {
+                    clearInterval(progressInterval);
+                    updateLoadingProgress(100);
+                    resolve(newViewer);
+                });
+            });
         }
 
         // Go to specific panorama with smooth transition
-        function goToPanorama(index) {
+        async function goToPanorama(index) {
             if (index < 0 || index >= panoramas.length || index === currentIndex || isTransitioning) {
                 return;
             }
@@ -515,39 +595,38 @@
             const direction = index > currentIndex ? 1 : -1;
             currentIndex = index;
 
-            // Show loading overlay
+            // Show loading overlay and reset progress
             document.getElementById('loadingOverlay').classList.remove('hidden');
+            updateLoadingProgress(0);
 
             // Create next viewer and fade in
-            viewerNext = initViewer(index, 'panorama-next');
+            viewerNext = await initViewer(index, 'panorama-next');
             
-            viewerNext.on('load', () => {
-                // Fade in the new panorama
-                document.getElementById('panorama-next').classList.add('active');
+            // Fade in the new panorama
+            document.getElementById('panorama-next').classList.add('active');
+            
+            // After transition, clean up
+            setTimeout(() => {
+                // Destroy old viewer
+                if (viewer) {
+                    viewer.destroy();
+                }
                 
-                // After transition, clean up
-                setTimeout(() => {
-                    // Destroy old viewer
-                    if (viewer) {
-                        viewer.destroy();
-                    }
-                    
-                    // Swap viewers
-                    viewer = viewerNext;
-                    viewerNext = null;
-                    
-                    // Reset the next container
-                    document.getElementById('panorama-next').classList.remove('active');
-                    document.getElementById('panorama-next').innerHTML = '';
-                    
-                    // Hide loading overlay
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                    isTransitioning = false;
-                    
-                    // Update UI
-                    updateUI(index);
-                }, 800);
-            });
+                // Swap viewers
+                viewer = viewerNext;
+                viewerNext = null;
+                
+                // Reset the next container
+                document.getElementById('panorama-next').classList.remove('active');
+                document.getElementById('panorama-next').innerHTML = '';
+                
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                isTransitioning = false;
+                
+                // Update UI
+                updateUI(index);
+            }, 800);
 
             updateUI(index);
         }
@@ -628,11 +707,16 @@
         // Initialize
         document.getElementById('totalCount').textContent = panoramas.length;
         initThumbnails();
-        viewer = initViewer(0, 'panorama');
-        viewer.on('load', () => {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        });
-        updateUI(0);
+        
+        // Start loading with progress
+        (async function() {
+            updateLoadingProgress(0);
+            viewer = await initViewer(0, 'panorama');
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 500);
+            updateUI(0);
+        })();
     </script>
 </body>
 </html>
