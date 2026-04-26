@@ -29,31 +29,32 @@
             right: 0;
             z-index: 100;
             padding: 20px 30px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .header-title {
-            font-size: 18px;
-            font-weight: 500;
-            letter-spacing: 1px;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         .header-subtitle {
             font-size: 13px;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
             margin-top: 4px;
         }
 
         .progress-indicator {
             font-size: 14px;
-            color: rgba(255,255,255,0.8);
-            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.15);
             padding: 8px 16px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
+            font-weight: 500;
         }
 
         /* Panorama Container */
@@ -65,9 +66,25 @@
             height: 100%;
         }
 
-        #panorama {
+        #panorama, #panorama-next {
             width: 100%;
             height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #panorama-next {
+            opacity: 0;
+            z-index: 5;
+            transition: opacity 0.8s ease-in-out;
+            pointer-events: none;
+        }
+
+        #panorama-next.active {
+            opacity: 1;
+            z-index: 15;
+            pointer-events: auto;
         }
 
         /* Navigation Controls */
@@ -122,13 +139,13 @@
         .nav-btn.forward {
             width: 64px;
             height: 64px;
-            background: rgba(79, 172, 254, 0.3);
-            border-color: rgba(79, 172, 254, 0.6);
+            background: rgba(79, 172, 254, 0.4);
+            border-color: rgba(79, 172, 254, 0.7);
         }
 
         .nav-btn.forward:hover {
-            background: rgba(79, 172, 254, 0.5);
-            border-color: rgba(79, 172, 254, 0.9);
+            background: rgba(79, 172, 254, 0.6);
+            border-color: rgba(79, 172, 254, 1);
         }
 
         /* Thumbnails */
@@ -138,11 +155,11 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             backdrop-filter: blur(20px);
             padding: 12px 16px;
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
         }
 
         .thumbnails {
@@ -170,7 +187,7 @@
 
         .thumbnail.active {
             border-color: #4facfe;
-            box-shadow: 0 0 15px rgba(79, 172, 254, 0.5);
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.6);
         }
 
         .thumbnail img {
@@ -183,7 +200,7 @@
             position: absolute;
             bottom: 4px;
             right: 4px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             color: #fff;
             font-size: 11px;
             padding: 2px 6px;
@@ -198,24 +215,25 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             backdrop-filter: blur(20px);
-            padding: 12px 24px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 28px;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.15);
             text-align: center;
-            transition: all 0.5s ease;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
 
         .location-name {
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 4px;
         }
 
         .location-desc {
             font-size: 12px;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
         }
 
         /* Loading overlay */
@@ -231,7 +249,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.6s ease;
         }
 
         .loading-overlay.hidden {
@@ -240,8 +258,8 @@
         }
 
         .loading-spinner {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border: 3px solid rgba(255,255,255,0.1);
             border-top-color: #4facfe;
             border-radius: 50%;
@@ -255,23 +273,7 @@
         .loading-text {
             margin-top: 20px;
             font-size: 14px;
-            color: rgba(255,255,255,0.6);
-        }
-
-        /* Transition animation */
-        .panorama-transition {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.6s ease;
-            z-index: 10;
-        }
-
-        .panorama-transition.active {
-            opacity: 1;
+            color: rgba(255,255,255,0.7);
         }
 
         /* Keyboard hint */
@@ -282,17 +284,19 @@
             transform: translateX(-50%);
             z-index: 100;
             font-size: 12px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.5);
             text-align: center;
+            transition: opacity 0.3s ease;
         }
 
         .keyboard-hint kbd {
             display: inline-block;
             padding: 3px 8px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             border-radius: 4px;
             margin: 0 4px;
             font-family: inherit;
+            font-weight: 500;
         }
 
         /* Pannellum customization */
@@ -317,6 +321,53 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header-title {
+                font-size: 16px;
+            }
+            
+            .header-subtitle {
+                font-size: 12px;
+            }
+            
+            .nav-controls {
+                bottom: 120px;
+            }
+            
+            .nav-btn {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .nav-btn.forward {
+                width: 56px;
+                height: 56px;
+            }
+            
+            .thumbnail {
+                width: 60px;
+                height: 40px;
+            }
+            
+            .location-indicator {
+                top: 70px;
+                padding: 10px 20px;
+            }
+            
+            .location-name {
+                font-size: 14px;
+            }
+            
+            .location-desc {
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -333,7 +384,7 @@
             <div class="header-subtitle">从入口到住院一部</div>
         </div>
         <div class="progress-indicator">
-            <span id="currentIndex">1</span> / 6
+            <span id="currentIndex">1</span> / <span id="totalCount">6</span>
         </div>
     </div>
 
@@ -346,6 +397,7 @@
     <!-- Panorama container -->
     <div id="panorama-container">
         <div id="panorama"></div>
+        <div id="panorama-next"></div>
     </div>
 
     <!-- Navigation controls -->
@@ -364,7 +416,7 @@
 
     <!-- Keyboard hint -->
     <div class="keyboard-hint">
-        使用 <kbd>←</kbd> <kbd>→</kbd> 方向键或点击按钮切换
+        使用 <kbd>\u2190</kbd> <kbd>\u2192</kbd> 方向键或点击按钮切换
     </div>
 
     <!-- Thumbnails -->
@@ -378,44 +430,45 @@
         const panoramas = [
             {
                 id: 1,
-                name: "医院入口",
-                desc: "望京医院正门入口",
-                image: "望京医院1.jpg"
+                name: "\u533b\u9662\u5165\u53e3",
+                desc: "\u671b\u4eac\u533b\u9662\u6b63\u95e8\u5165\u53e3",
+                image: "\u671b\u4eac\u533b\u96621.jpg"
             },
             {
                 id: 2,
-                name: "院内通道",
-                desc: "进入医院后的主通道",
-                image: "望京医院2.jpg"
+                name: "\u9662\u5185\u901a\u9053",
+                desc: "\u8fdb\u5165\u533b\u9662\u540e\u7684\u4e3b\u901a\u9053",
+                image: "\u671b\u4eac\u533b\u96622.jpg"
             },
             {
                 id: 3,
-                name: "院内道路",
-                desc: "院内主干道",
-                image: "望京医院3.jpg"
+                name: "\u9662\u5185\u9053\u8def",
+                desc: "\u9662\u5185\u4e3b\u5e72\u9053",
+                image: "\u671b\u4eac\u533b\u96623.jpg"
             },
             {
                 id: 4,
-                name: "门诊区域",
-                desc: "门诊楼附近区域",
-                image: "望京医院4.jpg"
+                name: "\u95e8\u8bca\u533a\u57df",
+                desc: "\u95e8\u8bca\u697c\u9644\u8fd1\u533a\u57df",
+                image: "\u671b\u4eac\u533b\u96624.jpg"
             },
             {
                 id: 5,
-                name: "住院部入口",
-                desc: "住院部大楼入口",
-                image: "望京医院5.jpg"
+                name: "\u4f4f\u9662\u90e8\u5165\u53e3",
+                desc: "\u4f4f\u9662\u90e8\u5927\u697c\u5165\u53e3",
+                image: "\u671b\u4eac\u533b\u96625.jpg"
             },
             {
                 id: 6,
-                name: "住院一部",
-                desc: "住院一部内部",
-                image: "望京医院6.jpg"
+                name: "\u4f4f\u9662\u4e00\u90e8",
+                desc: "\u4f4f\u9662\u4e00\u90e8\u5185\u90e8",
+                image: "\u671b\u4eac\u533b\u96626.jpg"
             }
         ];
 
         let currentIndex = 0;
         let viewer = null;
+        let viewerNext = null;
         let isTransitioning = false;
 
         // Initialize thumbnails
@@ -434,12 +487,8 @@
         }
 
         // Initialize panorama viewer
-        function initViewer(index) {
-            if (viewer) {
-                viewer.destroy();
-            }
-
-            viewer = pannellum.viewer('panorama', {
+        function initViewer(index, containerId) {
+            const viewerConfig = {
                 type: 'equirectangular',
                 panorama: panoramas[index].image,
                 autoLoad: true,
@@ -451,45 +500,53 @@
                 pitch: 0,
                 yaw: 0,
                 hfov: 120
-            });
+            };
 
-            viewer.on('load', () => {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            });
-
-            updateUI(index);
+            return pannellum.viewer(containerId, viewerConfig);
         }
 
-        // Go to specific panorama
+        // Go to specific panorama with smooth transition
         function goToPanorama(index) {
             if (index < 0 || index >= panoramas.length || index === currentIndex || isTransitioning) {
                 return;
             }
 
             isTransitioning = true;
+            const direction = index > currentIndex ? 1 : -1;
             currentIndex = index;
 
-            // Update viewer
-            viewer.destroy();
+            // Show loading overlay
             document.getElementById('loadingOverlay').classList.remove('hidden');
 
-            viewer = pannellum.viewer('panorama', {
-                type: 'equirectangular',
-                panorama: panoramas[index].image,
-                autoLoad: true,
-                showControls: false,
-                showZoomCtrl: false,
-                mouseZoom: true,
-                draggable: true,
-                disableKeyboardCtrl: true,
-                pitch: 0,
-                yaw: 0,
-                hfov: 120
-            });
-
-            viewer.on('load', () => {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                isTransitioning = false;
+            // Create next viewer and fade in
+            viewerNext = initViewer(index, 'panorama-next');
+            
+            viewerNext.on('load', () => {
+                // Fade in the new panorama
+                document.getElementById('panorama-next').classList.add('active');
+                
+                // After transition, clean up
+                setTimeout(() => {
+                    // Destroy old viewer
+                    if (viewer) {
+                        viewer.destroy();
+                    }
+                    
+                    // Swap viewers
+                    viewer = viewerNext;
+                    viewerNext = null;
+                    
+                    // Reset the next container
+                    document.getElementById('panorama-next').classList.remove('active');
+                    document.getElementById('panorama-next').innerHTML = '';
+                    
+                    // Hide loading overlay
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    isTransitioning = false;
+                    
+                    // Update UI
+                    updateUI(index);
+                }, 800);
             });
 
             updateUI(index);
@@ -569,8 +626,13 @@
         }
 
         // Initialize
+        document.getElementById('totalCount').textContent = panoramas.length;
         initThumbnails();
-        initViewer(0);
+        viewer = initViewer(0, 'panorama');
+        viewer.on('load', () => {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        });
+        updateUI(0);
     </script>
 </body>
 </html>
