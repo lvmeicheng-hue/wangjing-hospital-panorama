@@ -133,13 +133,13 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/pannellum/2.5.6/pannellum.js"></script>
     <script>
         var ossBase = "https://lvmeicheng.oss-cn-beijing.aliyuncs.com/wangjing-hospital/";
-        var panoramas = [
-            { id: 1, name: "医院入口", desc: "望京医院正门入口", image: ossBase + "p1.jpg" },
-            { id: 2, name: "院内通道", desc: "进入医院后的主通道", image: ossBase + "p2.jpg" },
-            { id: 3, name: "院内道路", desc: "院内主干道", image: ossBase + "p3.jpg" },
-            { id: 4, name: "门诊区域", desc: "门诊楼附近区域", image: ossBase + "p4.jpg" },
-            { id: 5, name: "住院部入口", desc: "住院部大楼入口", image: ossBase + "p5.jpg" },
-            { id: 6, name: "住院一部", desc: "住院一部内部", image: ossBase + "p6.jpg" }
+        var sceneData = [
+            { id: "s1", name: "医院入口", desc: "望京医院正门入口", image: ossBase + "p1.jpg" },
+            { id: "s2", name: "院内通道", desc: "进入医院后的主通道", image: ossBase + "p2.jpg" },
+            { id: "s3", name: "院内道路", desc: "院内主干道", image: ossBase + "p3.jpg" },
+            { id: "s4", name: "门诊区域", desc: "门诊楼附近区域", image: ossBase + "p4.jpg" },
+            { id: "s5", name: "住院部入口", desc: "住院部大楼入口", image: ossBase + "p5.jpg" },
+            { id: "s6", name: "住院一部", desc: "住院一部内部", image: ossBase + "p6.jpg" }
         ];
 
         var currentIndex = 0;
@@ -154,66 +154,90 @@
 
         function initThumbnails() {
             var c = document.getElementById('thumbnails');
-            for (var i = 0; i < panoramas.length; i++) {
+            for (var i = 0; i < sceneData.length; i++) {
                 (function(idx) {
                     var t = document.createElement('div');
                     t.className = 'thumbnail' + (idx === 0 ? ' active' : '');
-                    t.innerHTML = '<img src="' + panoramas[idx].image + '" alt="' + panoramas[idx].name + '"><div class="thumbnail-number">' + panoramas[idx].id + '</div>';
+                    t.innerHTML = '<img src="' + sceneData[idx].image + '" alt="' + sceneData[idx].name + '"><div class="thumbnail-number">' + (idx + 1) + '</div>';
                     t.onclick = function() { goTo(idx); };
                     c.appendChild(t);
                 })(i);
             }
         }
 
-        function createViewer(idx, cb) {
-            if (viewer) { try { viewer.destroy(); } catch(e) {} }
-            document.getElementById('panorama').innerHTML = '';
-            viewer = pannellum.viewer('panorama', {
-                type: 'equirectangular',
-                panorama: panoramas[idx].image,
-                autoLoad: true,
-                showControls: false,
-                showZoomCtrl: false,
-                mouseZoom: true,
-                draggable: true,
-                disableKeyboardCtrl: true,
-                compass: false,
-                pitch: 0, yaw: 0, hfov: 120
-            });
-            var prog = 0;
-            var timer = setInterval(function() {
-                if (prog < 85) { prog += Math.random() * 15; updateProgress(prog); }
-            }, 150);
-            viewer.on('load', function() {
-                clearInterval(timer);
-                updateProgress(100);
-                setTimeout(function() {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                    isTransitioning = false;
-                    if (cb) cb();
-                }, 300);
-            });
+        // Build Pannellum multi-scene config
+        function buildConfig() {
+            var scenes = {};
+            for (var i = 0; i < sceneData.length; i++) {
+                scenes[sceneData[i].id] = {
+                    type: "equirectangular",
+                    panorama: sceneData[i].image,
+                    pitch: 0, yaw: 0, hfov: 120
+                };
+            }
+            return {
+                "default": {
+                    firstScene: "s1",
+                    autoLoad: true,
+                    showControls: false,
+                    showZoomCtrl: false,
+                    mouseZoom: true,
+                    draggable: true,
+                    disableKeyboardCtrl: true,
+                    compass: false,
+                    sceneFadeDuration: 1000
+                },
+                "scenes": scenes
+            };
         }
 
         function goTo(idx) {
-            if (idx < 0 || idx >= panoramas.length || idx === currentIndex || isTransitioning) return;
+            if (idx < 0 || idx >= sceneData.length || idx === currentIndex || isTransitioning) return;
             isTransitioning = true;
             currentIndex = idx;
             document.getElementById('loadingOverlay').classList.remove('hidden');
             updateProgress(0);
             document.getElementById('loadingText').textContent = '正在加载全景图...';
-            createViewer(idx);
+
+            var prog = 0;
+            var timer = setInterval(function() {
+                if (prog < 85) { prog += Math.random() * 15; updateProgress(prog); }
+            }, 150);
+
+            // Use Pannellum native scene switching
+            viewer.loadScene(sceneData[idx].id);
+
+            viewer.on('scenechange', function onSceneChange() {
+                viewer.off('scenechange', onSceneChange);
+                clearInterval(timer);
+                updateProgress(100);
+                setTimeout(function() {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    isTransitioning = false;
+                }, 400);
+            });
+
+            // Fallback: if scenechange doesn't fire within 8s, force hide loading
+            setTimeout(function() {
+                if (isTransitioning) {
+                    clearInterval(timer);
+                    updateProgress(100);
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    isTransitioning = false;
+                }
+            }, 8000);
+
             updateUI(idx);
         }
 
         function updateUI(idx) {
             document.getElementById('currentIndex').textContent = idx + 1;
-            document.getElementById('locationName').textContent = panoramas[idx].name;
-            document.getElementById('locationDesc').textContent = panoramas[idx].desc;
+            document.getElementById('locationName').textContent = sceneData[idx].name;
+            document.getElementById('locationDesc').textContent = sceneData[idx].desc;
             var ind = document.getElementById('locationIndicator');
             ind.classList.remove('fade-in'); void ind.offsetWidth; ind.classList.add('fade-in');
             document.getElementById('backwardBtn').disabled = idx === 0;
-            document.getElementById('forwardBtn').disabled = idx === panoramas.length - 1;
+            document.getElementById('forwardBtn').disabled = idx === sceneData.length - 1;
             var thumbs = document.querySelectorAll('.thumbnail');
             for (var i = 0; i < thumbs.length; i++) {
                 thumbs[i].className = 'thumbnail' + (i === idx ? ' active' : '');
@@ -227,9 +251,22 @@
             else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(currentIndex - 1); }
         };
 
+        // Initialize with multi-scene config
         initThumbnails();
         updateProgress(0);
-        createViewer(0);
+        var prog = 0;
+        var initTimer = setInterval(function() {
+            if (prog < 85) { prog += Math.random() * 15; updateProgress(prog); }
+        }, 150);
+
+        viewer = pannellum.viewer('panorama', buildConfig());
+        viewer.on('load', function() {
+            clearInterval(initTimer);
+            updateProgress(100);
+            setTimeout(function() {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 300);
+        });
         updateUI(0);
     </script>
 </body>
